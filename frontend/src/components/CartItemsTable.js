@@ -5,6 +5,7 @@ import CartItem from './CartItem';
 const CartItemsTable = (props) => {
 
     const [usercart, setUsercart] = useState([]);
+    const cart_backend = process.env.CART_BACKEND
 
     async function getCartItems(url='', id='') {
         const response = await fetch(url + 'carts/' + id);
@@ -17,7 +18,7 @@ const CartItemsTable = (props) => {
     }
 
     useEffect(() => {
-        getCart('https://autumn-snow-5424.us-east1.akkaserverless.app/', props.location.state.user.id);
+        getCart(cart_backend, props.location.state.user.id);
     }, []);
 
     console.log(usercart);

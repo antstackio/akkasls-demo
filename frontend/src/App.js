@@ -83,6 +83,10 @@ const inventory = [
   }
 ]
 
+// Read enpoints from environment variables
+const user_backend = process.env.USER_BACKEND
+const cart_backend = process.env.CART_BACKEND
+
 function App() {
 
   const [user, setUser] = useState();
@@ -103,7 +107,7 @@ function App() {
   };
 
 
-  async function getAllUsers(url='https://winter-fog-1155.us-east1.akkaserverless.app/admin') {
+  async function getAllUsers(url=user_backend+'/admin') {
     const admin = fetch(url)
     .then(data => { return data.text() })
     .then(res => {return res})
@@ -144,7 +148,7 @@ function App() {
 
   const checkUser = async (new_user) => {
     const request = new_user;
-    const user_url = 'https://winter-fog-1155.us-east1.akkaserverless.app';
+    const user_url = user_backend;
     var response = await getUser(user_url, new_user.id);
     if (response.status === 500) {
       response = await addUser(user_url + '/users/' + new_user.id, request);
@@ -163,7 +167,7 @@ function App() {
   }
 
   async function getCart() {
-    const cart_url = 'https://autumn-snow-5424.us-east1.akkaserverless.app/';
+    const cart_url = cart_backend;
     console.log("Get cart of ", user);
     var response = await getCartItems(cart_url, user.id);
 
@@ -187,7 +191,7 @@ function App() {
   }
 
   const removeFromCart = async (id) => {
-    const cart_url = 'https://autumn-snow-5424.us-east1.akkaserverless.app/';
+    const cart_url = cart_backend;
     await removeItemFromCart(cart_url, id);
 
     await getCart();
@@ -210,7 +214,7 @@ function App() {
   }
 
   const addToCart = async (id) => {
-    const cart_url = 'https://autumn-snow-5424.us-east1.akkaserverless.app/';
+    const cart_url = cart_backend;
     const itemFromInventory = items.filter((item) => {
       return item.id === id;
     });

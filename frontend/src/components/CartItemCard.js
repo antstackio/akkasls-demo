@@ -1,5 +1,4 @@
 import React from 'react';
-import sample_image from '../images/db1.png';
 import { Link } from 'react-router-dom';
 
 const CartItemCard = (props) => {
