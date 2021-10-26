@@ -1,0 +1,27 @@
+syntax = "proto3";
+
+package ecommerce.persistence;
+
+import "akkaserverless/annotations.proto";
+
+// Describes how the domain relates to an event sourced entity
+option (akkaserverless.file).event_sourced_entity = {
+    name: "Users"
+    entity_type: "users"
+    state: "User"
+    events: "UserCreated"
+};
+
+// State that is persisted
+message User {
+    string id = 1;
+    string name = 2;
+    string emailAddress = 3;
+}
+
+// Event sent when a user is added
+message UserCreated {
+    string id = 1;
+    string name = 2;
+    string emailAddress = 3;
+}

@@ -1,0 +1,85 @@
+syntax = "proto3";
+
+package ecommerce;
+
+import "akkaserverless/annotations.proto";
+import "google/api/annotations.proto";
+import "domain.proto";
+
+// Message definition for user in terms of front end
+message User {
+    string id = 1 [(akkaserverless.field).entity_key = true];
+    string name = 2;
+    string emailAddress = 3;
+}
+
+// Message definition for getting user info based on ID
+message GetUser {
+    string id = 1 [(akkaserverless.field).entity_key = true];
+}
+
+// Message definition for getting all users who are active
+// (doing this since query to get all users does not work)
+message GetUserForAdmin {
+}
+
+// This service consists of the backed services that should be handled
+// Like adding user, later orders too
+service UserService {
+    option (akkaserverless.service) = {
+        type: SERVICE_TYPE_ENTITY
+        component: ".domain.Users"
+    };
+
+    rpc AddUser (User) returns (User) {
+        option (google.api.http) = {
+            post: "/users/{id}"
+            body: "*"
+        };
+    }
+}
+
+// rpc methods that the frontend service can handle
+service UserInterface {
+    rpc ProcessUserCreated (ecommerce.persistence.UserCreated) returns (ecommerce.persistence.User) {
+        option (akkaserverless.method).eventing.in = {
+            event_sourced_entity: "users"
+        };
+        option (akkaserverless.method).view.update = {
+            table: "users"
+            transform_updates: true
+        };
+    }
+    rpc GetUserDetails (GetUser) returns (ecommerce.persistence.User) {
+        option (akkaserverless.method).view.query = {
+            query: "SELECT * FROM users WHERE id = :id"
+        };
+        option (google.api.http) = {
+            get: "/user/{id}"
+        };
+    }
+}
+
+// For some reason we can't have 2 view queries for the same view.
+
+// This service handles the admin side of the application
+service AdminInterface {
+    rpc ProcessUserCreated (ecommerce.persistence.UserCreated) returns (User) {
+        option (akkaserverless.method).eventing.in = {
+            event_sourced_entity: "users"
+        };
+        option (akkaserverless.method).view.update = {
+            table: "users_admin"
+            transform_updates: true
+        };
+    }
+
+    rpc GetAllUserDetails (GetUserForAdmin) returns (stream User) {
+        option (akkaserverless.method).view.query = {
+            query: "SELECT * FROM users_admin"
+        };
+        option (google.api.http) = {
+            get: "/admin"
+        };
+    }
+}
